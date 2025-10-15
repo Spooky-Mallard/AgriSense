@@ -5,7 +5,17 @@ module.exports = {
         "./public/index.html",
     ],
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                'ABeeZee': ['ABeeZee', 'sans-serif'],
+            },
+            width:{
+                "1/8": '5.55%',
+            },
+            height:{
+                "1/8": '5.55%',
+            }
+        },
     },
     plugins: [],
 };

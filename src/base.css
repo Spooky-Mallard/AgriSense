@@ -8,6 +8,14 @@
 
 .bg-accent{ background-color: var(--accent) !important;}
 .bg-primary{ background-color: var(--primary) !important;}
+.bg-amber-100 {
+  background-color: #E18600;
+}
+
+.footer-style{
+  width: 6% !important;
+  height: 6% !important;
+}
 
 body {
   margin: 0;

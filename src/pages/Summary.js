@@ -1,5 +1,6 @@
 import React from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import NutrientsDashboard from "../components/nutrientChart";
 import "react-circular-progressbar/dist/styles.css";
 
 const Summary = () => {
@@ -15,18 +16,6 @@ const Summary = () => {
     },
   };
 
-function StatWidget({ label, value, unit }) {
-  return (
-    <div className="rounded-2xl shadow-md p-4 bg-white border-l-4 border-accent">
-      <p className="text-gray-500">{label}</p>
-      <h2 className="text-2xl font-bold text-accent">
-        {value} <span className="text-sm">{unit}</span>
-      </h2>
-    </div>
-  );
-}
-
-
   return (
     <div className="bg-background min-h-screen p-8">
       {/* Header */}
@@ -36,15 +25,17 @@ function StatWidget({ label, value, unit }) {
       </div>
 
       {/* Gauges */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="flex flex-col md:flex-row justify-between gap-10">
+      {/* Left section — the 2x2 grid */}
+      <div className="grid md:w-1/2 p-10 grid-cols-2 gap-10 mb-12">
         {[
           { label: "Temperature", value: stats.temperature, unit: "°C" },
           { label: "pH", value: stats.ph },
           { label: "Humidity", value: stats.humidity, unit: "%" },
           { label: "Moisture", value: stats.moisture, unit: "%" },
         ].map((item, idx) => (
-          <div key={idx} className="flex flex-col items-center">
-            <div className="w-32 h-32">
+          <div key={idx} className="flex flex-col items-center justify-center">
+            <div className="w-full m-5">
               <CircularProgressbar
                 value={item.value}
                 maxValue={item.label === "pH" ? 14 : 100}
@@ -60,25 +51,12 @@ function StatWidget({ label, value, unit }) {
           </div>
         ))}
       </div>
-
-      {/* Nutrients */}
-      <div className="bg-accent p-6 rounded-lg">
-        <h3 className="text-lg font-semibold text-primary mb-4">Nutrients</h3>
-        <div className="flex justify-around">
-          {Object.entries(stats.nutrients).map(([key, value]) => (
-            <div key={key} className="flex flex-col items-center">
-              <StatWidget label={key} value={value} unit="ppm" />
-              <div className="w-6 h-40 bg-background rounded-full relative overflow-hidden">
-                <div
-                  className="absolute bottom-0 w-full bg-secondary"
-                  style={{ height: `${value}%` }}
-                />
-              </div>
-              <p className="mt-2 text-sm capitalize text-primary">{key}</p>
-            </div>
-          ))}
+    <div className="flex md:w-1/2 w-full item-center p-10">
+          {/* The Chart */} 
+          <NutrientsDashboard />
         </div>
-      </div>
+       
+    </div>
     </div>
   );
 };

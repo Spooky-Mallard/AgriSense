@@ -13,8 +13,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={
-              <Dashboard > Hi there</ Dashboard>
-              
+              <Dashboard />
               } />
             <Route path="/insights" element={
               <Insights />
