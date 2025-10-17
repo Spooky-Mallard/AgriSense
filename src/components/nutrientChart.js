@@ -13,7 +13,7 @@ const NutrientBar = ({
     backgroundBar = true 
   } = nutrient;
 
-  const fillPercentage = (currentValue / maxValue) * 100;
+  const fillPercentage = Math.min((currentValue / maxValue) * 100, 100);
 
   return (
     <div className={`flex flex-col h-full items-center ${className}`}>
@@ -39,38 +39,51 @@ const NutrientBar = ({
 };
 
 // Main Nutrients Component with data configuration
-const NutrientsDashboard = () => {
-  const nutrientsConfig = [
-    { 
-      name: "Nitrogen", 
-      currentValue: 86.42, 
-      maxValue: 316.3,
-      barColor: "bg-amber-100"
-    },
-    { 
-      name: "Phosphorous", 
-      currentValue: 123.58, 
-      maxValue: 316.3,
-      barColor: "bg-amber-100"
-    },
-    { 
-      name: "Potassium", 
-      currentValue: 183.21, 
-      maxValue: 316.3,
-      barColor: "bg-amber-100"
-    },
-  ];
+const NutrientsDashboard = ({nutrients}) => {
+  const buildNutrientConfig = (nutrientsObj) => {
+    if (!nutrientsObj || typeof nutrientsObj !== 'object') {
+      return [];
+    }
+
+    // Handle both object and array formats
+    if (Array.isArray(nutrientsObj)) {
+      return nutrientsObj;
+    }
+
+    // Convert object format: { nitrogen: 65, phosphorous: 40, potassium: 50 }
+    return [
+      { 
+        name: "Nitrogen", 
+        currentValue: nutrientsObj.nitrogen || 0, 
+        maxValue: 316.3,
+        barColor: "bg-amber-100"
+      },
+      { 
+        name: "Phosphorous", 
+        currentValue: nutrientsObj.phosphorous || 0, 
+        maxValue: 316.3,
+        barColor: "bg-amber-100"
+      },
+      { 
+        name: "Potassium", 
+        currentValue: nutrientsObj.potassium || 0, 
+        maxValue: 316.3,
+        barColor: "bg-amber-100"
+      },
+    ];
+  };
+
+  const nutrientsConfig = buildNutrientConfig(nutrients);
 
   return (
-    <div className="flex flex-col w-full bg-white rounded-lg shadow-sm border border-gray-100">
+  <div className="flex flex-col w-full h-full bg-white rounded-lg shadow-sm border border-gray-100">
       {/* Title */}
       <div className="relative w-full h-[29px] top-0 font-ABeeZee font-bold text-[15px] leading-8 text-xl text-center text-green-900 text-opacity-50">
         NUTRIENTS
       </div>
       
       {/* Chart Container */}
-      <div className="relative w-full h-full -translate-x-1/2 -translate-y-1/2">
-        <div className="flex justify-around items-end h-full px-6">
+      <div className="flex-1 flex justify-around items-end px-6">
           {nutrientsConfig.map((nutrient, index) => (
             <NutrientBar
               key={nutrient.name}
@@ -78,7 +91,6 @@ const NutrientsDashboard = () => {
               className="flex-1 mx-3"
             />
           ))}
-        </div>
       </div>
       
       {/* Optional: Values Display */}
