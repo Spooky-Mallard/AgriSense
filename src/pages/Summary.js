@@ -28,6 +28,39 @@ const Summary = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Fetch stats using the api client
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log(`Fetching stats for timeframe: ${timeframe}`);
+        
+        // Using your api client - adjust endpoint if needed
+        const response = await api.get(`/sensors/stats?timeframe=${timeframe}`);
+        
+        console.log("Stats received:", response.data);
+        setStats(response.data);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+        
+        // More detailed error message
+        const errorMsg = err.response?.statusText 
+          || err.message 
+          || "Failed to fetch sensor data";
+        
+        setError(errorMsg);
+        // Keep showing default data on error
+        setStats(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [timeframe]);
+
   const timeframeOptions = [
     { value: "hourly", label: "Hourly" },
     { value: "six-hours", label: "Last 6 Hours" },
@@ -90,10 +123,13 @@ const Summary = () => {
           </div>
         </div>
 
-        {loading && <p className="mt-3 text-sm text-primary font-medium">Loading data...</p>}
-        {error && <p className="mt-3 text-sm text-red-600 font-medium">Error: {error}</p>}
+        {loading && (
+          <p className="mt-3 text-sm text-primary font-medium animate-pulse">⏳ Loading data...</p>
+        )}
+        {error && (
+          <p className="mt-3 text-sm text-red-600 font-medium">⚠️ Error: {error}</p>
+        )}
       </div>
-      
 
       {/* Gauges + Nutrients side by side */}
       <div className="flex flex-col md:flex-row justify-between gap-10 items-start">
