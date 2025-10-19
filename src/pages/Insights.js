@@ -1,29 +1,46 @@
 import React, { useState, useEffect } from "react";
 import InsightItem from "../components/insightitem";
-import api from "../api";
+import axios from "axios";
 
 export default function Insights() {
-  const [timeframe, setTimeframe] = useState("daily");
+  const [timeframe, setTimeframe] = useState("24h");
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const timeframeOptions = [
-    { value: "hourly", label: "Hourly" },
-    { value: "six-hours", label: "Last 6 Hours" },
-    { value: "daily", label: "Daily" },
+    { value: "1h", label: "Hourly" },
+    { value: "6h", label: "Last 6 Hours" },
+    { value: "24h", label: "Daily" },
     { value: "weekly", label: "Weekly" },
     { value: "monthly", label: "Monthly" },
   ];
 
-  // Default insights in case backend fails
-  const defaultInsights = [
-    { title: "pH", description: "Body text for whatever you'd like to say..." },
-    { title: "Moisture", description: "Body text for whatever you'd like to say..." },
-    { title: "Temperature", description: "Body text for whatever you'd like to say..." },
-    { title: "Nutrients", description: "Body text for whatever you'd like to say..." },
-    { title: "Humidity", description: "Body text for whatever you'd like to say..." },
-  ];
+  // Parse fertilizer prediction string into individual insights
+  const parseFertilizerPrediction = (predictionText) => {
+    if (!predictionText) return [];
+
+    // Split by pipe character and clean up
+    const items = predictionText.split("|").map(item => item.trim()).filter(Boolean);
+
+    return items.map(item => {
+      // Extract title (first few words before colon)
+      const colonIndex = item.indexOf(":");
+      const title = colonIndex > 0 
+        ? item.substring(0, colonIndex).trim() 
+        : item.substring(0, 30);
+
+      // Extract description (rest of text after colon)
+      const description = colonIndex > 0 
+        ? item.substring(colonIndex + 1).trim() 
+        : item;
+
+      return {
+        title: title || "Insight",
+        description: description || item,
+      };
+    });
+  };
 
   // Fetch insights from backend
   useEffect(() => {
@@ -32,28 +49,33 @@ export default function Insights() {
       setError(null);
 
       try {
-        const url = `/insights?timeframe=${timeframe}`;
+        const url = `https://smart-soil-ml-api-production.up.railway.app/insights/sensor/SENSOR001/${timeframe}`;
         console.log("Fetching insights from:", url);
 
-        const response = await api.get(url);
+        const response = await axios.get(url);
+        console.log("Received response:", response.data);
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const data = response.data;
+
+        // Parse the predictions array
+        let insightsList = [];
+
+        if (data.predictions && Array.isArray(data.predictions)) {
+          // Process each prediction
+          data.predictions.forEach(prediction => {
+            if (prediction.fertilizer_prediction) {
+              const parsed = parseFertilizerPrediction(prediction.fertilizer_prediction);
+              insightsList = [...insightsList, ...parsed];
+            }
+          });
         }
 
-        const data = await response.json();
-        console.log("Received insights:", data);
-
-        // Handle both array and object response formats
-        const insightsList = Array.isArray(data) 
-          ? data 
-          : data.insights || data.data || [];
-
-        setInsights(insightsList.length > 0 ? insightsList : defaultInsights);
+        console.log("Parsed insights:", insightsList);
+        setInsights(insightsList.length > 0 ? insightsList : getDefaultInsights());
       } catch (err) {
         console.error("Error fetching insights:", err);
-        setError(err.message);
-        setInsights(defaultInsights);
+        setError(err.message || "Failed to fetch insights");
+        setInsights(getDefaultInsights());
       } finally {
         setLoading(false);
       }
@@ -61,6 +83,29 @@ export default function Insights() {
 
     fetchInsights();
   }, [timeframe]);
+
+  const getDefaultInsights = () => [
+    { 
+      title: "pH Level", 
+      description: "Soil pH is within acceptable range for most crops." 
+    },
+    { 
+      title: "Moisture Level", 
+      description: "Soil moisture is optimal for current growth stage." 
+    },
+    { 
+      title: "Nitrogen", 
+      description: "Nitrogen levels are adequate. Monitor for changes." 
+    },
+    { 
+      title: "Phosphorus", 
+      description: "Phosphorus availability is good for root development." 
+    },
+    { 
+      title: "Potassium", 
+      description: "Potassium levels support plant health and immunity." 
+    },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">

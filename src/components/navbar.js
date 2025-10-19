@@ -10,9 +10,6 @@ export default function Navbar() {
         <a href="/" className="hover:text-gray-600">Dashboard</a>
         <a href="/summary" className="hover:text-gray-600">Summary</a>
         <a href="/insights" className="hover:text-gray-600">Insights</a>
-        <a href="#" className="hover:text-gray-600">Pricing</a>
-        <a href="#" className="hover:text-gray-600">Contact</a>
-        <a href="#" className="hover:text-gray-600">Support</a>
       </div>
 
       {/* Auth buttons */}

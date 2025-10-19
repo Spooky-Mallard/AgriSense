@@ -55,19 +55,19 @@ const NutrientsDashboard = ({nutrients}) => {
       { 
         name: "Nitrogen", 
         currentValue: nutrientsObj.nitrogen || 0, 
-        maxValue: 316.3,
+        maxValue: 100,
         barColor: "bg-amber-100"
       },
       { 
         name: "Phosphorous", 
         currentValue: nutrientsObj.phosphorous || 0, 
-        maxValue: 316.3,
+        maxValue: 100,
         barColor: "bg-amber-100"
       },
       { 
         name: "Potassium", 
         currentValue: nutrientsObj.potassium || 0, 
-        maxValue: 316.3,
+        maxValue: 100,
         barColor: "bg-amber-100"
       },
     ];

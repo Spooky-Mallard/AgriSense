@@ -8,13 +8,13 @@ return(
         <Hero />
         <main className="max-w-5xl mx-auto px-4">
             <Section 
-            title="Title" 
-            text="Body text for whatever you’d like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story." 
+            title="Real-Time Soil Monitoring" 
+            text="Monitor your soil health with precision. Our advanced sensor technology tracks pH levels, moisture content, nutrient composition, and temperature in real-time. Get instant insights into nitrogen, phosphorus, and potassium levels to optimize fertilizer application and maximize crop yield." 
             />
             <ImageSection />
             <Section 
-            title="Title" 
-            text="Body text for whatever you’d like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story." 
+            title="AI-Powered Fertilizer Recommendations" 
+            text="Stop guessing about fertilizer needs. Our intelligent system analyzes sensor data and provides tailored fertilizer recommendations based on your soil's specific nutrient deficiencies. Receive actionable insights for DAP, Urea, MOP, and other fertilizers to ensure your crops get exactly what they need, when they need it." 
             />
         </main>
     </div>

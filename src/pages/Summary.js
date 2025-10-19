@@ -28,6 +28,36 @@ const Summary = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Parse and aggregate sensor data from array response
+  const parseAndAggregateData = (dataArray) => {
+    if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
+      return null;
+    }
+
+    // Extract averages from the first entry (or aggregate all if multiple)
+    // For hourly: take the latest hour
+    // For daily/weekly/monthly: usually one entry, so just take it
+    const latestEntry = dataArray[dataArray.length - 1];
+
+    if (!latestEntry.averages) {
+      return null;
+    }
+
+    const avg = latestEntry.averages;
+
+    return {
+      temperature: Math.round(avg.temperature * 100) / 100,
+      ph: Math.round(avg.ph * 100) / 100,
+      humidity: Math.round(avg.humidity * 100) / 100,
+      moisture: Math.round(avg.moisture * 100) / 100,
+      nutrients: {
+        nitrogen: Math.round(avg.nitrogen * 100) / 100,
+        phosphorous: Math.round(avg.phosphorus * 100) / 100,
+        potassium: Math.round(avg.potassium * 100) / 100,
+      },
+    };
+  };
+
   // Fetch stats using the api client
   useEffect(() => {
     const fetchStats = async () => {
@@ -36,22 +66,27 @@ const Summary = () => {
 
       try {
         console.log(`Fetching stats for timeframe: ${timeframe}`);
-        
-        // Using your api client - adjust endpoint if needed
-        const response = await api.get(`/sensors/stats?timeframe=${timeframe}`);
-        
-        console.log("Stats received:", response.data);
-        setStats(response.data);
+
+        const response = await api.get(`/api/soil/sensor/SENSOR001/${timeframe}`);
+
+        console.log("Raw response:", response.data);
+
+        // Parse the array response
+        const parsedStats = parseAndAggregateData(response.data);
+
+        if (parsedStats) {
+          console.log("Parsed stats:", parsedStats);
+          setStats(parsedStats);
+        } else {
+          throw new Error("Invalid response format: missing averages data");
+        }
       } catch (err) {
         console.error("Error fetching stats:", err);
-        
-        // More detailed error message
-        const errorMsg = err.response?.statusText 
-          || err.message 
-          || "Failed to fetch sensor data";
-        
+
+        const errorMsg =
+          err.response?.statusText || err.message || "Failed to fetch sensor data";
+
         setError(errorMsg);
-        // Keep showing default data on error
         setStats(null);
       } finally {
         setLoading(false);
@@ -63,7 +98,7 @@ const Summary = () => {
 
   const timeframeOptions = [
     { value: "hourly", label: "Hourly" },
-    { value: "six-hours", label: "Last 6 Hours" },
+    { value: "six-hourly", label: "Last 6 Hours" },
     { value: "daily", label: "Daily" },
     { value: "weekly", label: "Weekly" },
     { value: "monthly", label: "Monthly" },
@@ -98,9 +133,8 @@ const Summary = () => {
           <div>
             <h2 className="text-2xl font-bold text-primary">Summary of Sensor Data</h2>
             <p className="text-gray-600">
-              Summary of the data collected — {
-                timeframeOptions.find(opt => opt.value === timeframe)?.label
-              }
+              Summary of the data collected —{" "}
+              {timeframeOptions.find((opt) => opt.value === timeframe)?.label}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -124,7 +158,9 @@ const Summary = () => {
         </div>
 
         {loading && (
-          <p className="mt-3 text-sm text-primary font-medium animate-pulse">⏳ Loading data...</p>
+          <p className="mt-3 text-sm text-primary font-medium animate-pulse">
+            ⏳ Loading data...
+          </p>
         )}
         {error && (
           <p className="mt-3 text-sm text-red-600 font-medium">⚠️ Error: {error}</p>
